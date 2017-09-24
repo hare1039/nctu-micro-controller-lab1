@@ -1,29 +1,21 @@
   .syntax unified
   .cpu cortex-m4
   .thumb
-
-  .global X
-  .data
-  .align 2
-  .type X, %object
-  .size X, 4
-X:
-  .word 5
-  .global Y
-  .align 2
-  .type Y, %object
-  .size Y, 4
-Y:
-  .word 10
+.data
+  X: .word 100
+  str: .asciz "Hello World!"
 .text
   .global main
-main:
-	ldr r0, =X
-	ldr r0, [r0]
-	ldr r1, =Y
-	ldr r1, [r1]
-	MULS r0, r0, r1
-	ADDS r0, r0, r1
-	SUBS r2, r1, r0
+  .equ AA, 0x55
 
+main:
+	ldr r1, =X
+	ldr r3, =str
+	ldr r0, [r1]
+	movs r2, #AA
+	adds r2, r2, r0
+	str r2, [r1]
+	ldr r1, =str
+	ldr r2, [r1]
+	adds r3, r3, r3
 L:B L
