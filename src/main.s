@@ -9,7 +9,8 @@
 
 .text
 	.global main
-	postfix_expr: .asciz "-100 10 20 + - 10 +"
+	postfix_expr: .asciz "70 0 -1 + 50 + -"
+	.align 4
 
 stoi: // func stoi(char *:r1, int& start:r2) -> int:r0
 	PUSH {r3-r7}
@@ -35,6 +36,7 @@ stoi: // func stoi(char *:r1, int& start:r2) -> int:r0
 
 
 	mov r0, #0               // num = 0;
+	mov r3, #1               // error = 1
     WHILE_0000:              // while(true)
 	    ldrb r5, [r1, r2]    // char x = r1[pos]
     		cmp  r5, #32         // if (x == ' ')
@@ -54,6 +56,7 @@ stoi: // func stoi(char *:r1, int& start:r2) -> int:r0
         IF_0004_ELSE:
         END_IF_0004:
 
+		mov r3, #0           // error = false
         add r2, r2, #1       // pos = pos + 1
         mov r6, #10          // load r6 as 10
         sub r5, r5, #48      // x = x - '0'
@@ -66,8 +69,16 @@ stoi: // func stoi(char *:r1, int& start:r2) -> int:r0
     beq IF_0002_TRUE
     b   IF_0002_ELSE
     IF_0002_TRUE:
-    	    ldr r6, =stoi_error
-    	    str r4, [r6]
+        cmp r3, #1
+    		beq IF_0007_TRUE
+   		b   IF_0007_ELSE
+   		IF_0007_TRUE:
+   			mov r0, #254
+   			ldr r6, =stoi_error
+    	    		str r4, [r6]
+   			b END_IF_0007
+   		IF_0007_ELSE:
+   		END_IF_0007:
     	    b END_IF_0002
     IF_0002_ELSE:
     END_IF_0002:
@@ -100,7 +111,7 @@ main:
 
 		bl stoi
 
-		cmp r0, #0 // 0 == failed
+		cmp r0, #254 // 254 == failed
 		beq IF_0006_TRUE
 		b   IF_0006_ELSE
 		IF_0006_TRUE:
