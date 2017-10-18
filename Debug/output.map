@@ -239,179 +239,180 @@ LOAD /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools
                 0x0000000008000000                g_pfnVectors
                 0x0000000008000188                . = ALIGN (0x4)
 
-.text           0x0000000008000188      0x2b0
-                0x0000000008000188                . = ALIGN (0x4)
+.text           0x0000000008000190      0x33c
+                0x0000000008000190                . = ALIGN (0x4)
  *(.text)
- .text          0x0000000008000188       0x6c /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.15.0.201708311556/tools/compiler/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7e-m/fpv4-sp/hard/crtbegin.o
- .text          0x00000000080001f4       0x70 src/main.o
-                0x000000000800022e                main
+ .text          0x0000000008000190       0x6c /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.15.0.201708311556/tools/compiler/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7e-m/fpv4-sp/hard/crtbegin.o
+ *fill*         0x00000000080001fc        0x4 
+ .text          0x0000000008000200       0xf8 src/main.o
+                0x0000000008000298                main
  *(.text*)
  .text.Reset_Handler
-                0x0000000008000264       0x48 startup/startup_stm32.o
-                0x0000000008000264                Reset_Handler
+                0x00000000080002f8       0x48 startup/startup_stm32.o
+                0x00000000080002f8                Reset_Handler
  .text.Default_Handler
-                0x00000000080002ac        0x2 startup/startup_stm32.o
-                0x00000000080002ac                BusFault_Handler
-                0x00000000080002ac                HardFault_Handler
-                0x00000000080002ac                SysTick_Handler
-                0x00000000080002ac                PendSV_Handler
-                0x00000000080002ac                NMI_Handler
-                0x00000000080002ac                UsageFault_Handler
-                0x00000000080002ac                Default_Handler
-                0x00000000080002ac                MemManage_Handler
-                0x00000000080002ac                SVC_Handler
-                0x00000000080002ac                DebugMon_Handler
- *fill*         0x00000000080002ae        0x2 
+                0x0000000008000340        0x2 startup/startup_stm32.o
+                0x0000000008000340                BusFault_Handler
+                0x0000000008000340                HardFault_Handler
+                0x0000000008000340                SysTick_Handler
+                0x0000000008000340                PendSV_Handler
+                0x0000000008000340                NMI_Handler
+                0x0000000008000340                UsageFault_Handler
+                0x0000000008000340                Default_Handler
+                0x0000000008000340                MemManage_Handler
+                0x0000000008000340                SVC_Handler
+                0x0000000008000340                DebugMon_Handler
+ *fill*         0x0000000008000342        0x2 
  .text.__libc_init_array
-                0x00000000080002b0       0x50 /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.15.0.201708311556/tools/compiler/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard/libc.a(lib_a-init.o)
-                0x00000000080002b0                __libc_init_array
+                0x0000000008000344       0x50 /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.15.0.201708311556/tools/compiler/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard/libc.a(lib_a-init.o)
+                0x0000000008000344                __libc_init_array
  .text.startup.register_fini
-                0x0000000008000300       0x14 /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.15.0.201708311556/tools/compiler/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard/libc.a(lib_a-__call_atexit.o)
- .text.atexit   0x0000000008000314        0xc /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.15.0.201708311556/tools/compiler/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard/libc.a(lib_a-atexit.o)
-                0x0000000008000314                atexit
+                0x0000000008000394       0x14 /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.15.0.201708311556/tools/compiler/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard/libc.a(lib_a-__call_atexit.o)
+ .text.atexit   0x00000000080003a8        0xc /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.15.0.201708311556/tools/compiler/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard/libc.a(lib_a-atexit.o)
+                0x00000000080003a8                atexit
  .text.__libc_fini_array
-                0x0000000008000320       0x34 /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.15.0.201708311556/tools/compiler/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard/libc.a(lib_a-fini.o)
-                0x0000000008000320                __libc_fini_array
+                0x00000000080003b4       0x34 /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.15.0.201708311556/tools/compiler/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard/libc.a(lib_a-fini.o)
+                0x00000000080003b4                __libc_fini_array
  .text.__retarget_lock_acquire_recursive
-                0x0000000008000354        0x4 /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.15.0.201708311556/tools/compiler/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard/libc.a(lib_a-lock.o)
-                0x0000000008000354                __retarget_lock_acquire_recursive
+                0x00000000080003e8        0x4 /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.15.0.201708311556/tools/compiler/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard/libc.a(lib_a-lock.o)
+                0x00000000080003e8                __retarget_lock_acquire_recursive
  .text.__retarget_lock_release_recursive
-                0x0000000008000358        0x4 /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.15.0.201708311556/tools/compiler/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard/libc.a(lib_a-lock.o)
-                0x0000000008000358                __retarget_lock_release_recursive
+                0x00000000080003ec        0x4 /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.15.0.201708311556/tools/compiler/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard/libc.a(lib_a-lock.o)
+                0x00000000080003ec                __retarget_lock_release_recursive
  .text.__register_exitproc
-                0x000000000800035c       0xc4 /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.15.0.201708311556/tools/compiler/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard/libc.a(lib_a-__atexit.o)
-                0x000000000800035c                __register_exitproc
+                0x00000000080003f0       0xc4 /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.15.0.201708311556/tools/compiler/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard/libc.a(lib_a-__atexit.o)
+                0x00000000080003f0                __register_exitproc
  *(.glue_7)
- .glue_7        0x0000000008000420        0x0 linker stubs
+ .glue_7        0x00000000080004b4        0x0 linker stubs
  *(.glue_7t)
- .glue_7t       0x0000000008000420        0x0 linker stubs
+ .glue_7t       0x00000000080004b4        0x0 linker stubs
  *(.eh_frame)
- .eh_frame      0x0000000008000420        0x0 /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.15.0.201708311556/tools/compiler/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7e-m/fpv4-sp/hard/crtbegin.o
+ .eh_frame      0x00000000080004b4        0x0 /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.15.0.201708311556/tools/compiler/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7e-m/fpv4-sp/hard/crtbegin.o
  *(.init)
- .init          0x0000000008000420        0x4 /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.15.0.201708311556/tools/compiler/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7e-m/fpv4-sp/hard/crti.o
-                0x0000000008000420                _init
- .init          0x0000000008000424        0x8 /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.15.0.201708311556/tools/compiler/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7e-m/fpv4-sp/hard/crtn.o
+ .init          0x00000000080004b4        0x4 /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.15.0.201708311556/tools/compiler/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7e-m/fpv4-sp/hard/crti.o
+                0x00000000080004b4                _init
+ .init          0x00000000080004b8        0x8 /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.15.0.201708311556/tools/compiler/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7e-m/fpv4-sp/hard/crtn.o
  *(.fini)
- .fini          0x000000000800042c        0x4 /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.15.0.201708311556/tools/compiler/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7e-m/fpv4-sp/hard/crti.o
-                0x000000000800042c                _fini
- .fini          0x0000000008000430        0x8 /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.15.0.201708311556/tools/compiler/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7e-m/fpv4-sp/hard/crtn.o
-                0x0000000008000438                . = ALIGN (0x4)
-                0x0000000008000438                _etext = .
+ .fini          0x00000000080004c0        0x4 /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.15.0.201708311556/tools/compiler/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7e-m/fpv4-sp/hard/crti.o
+                0x00000000080004c0                _fini
+ .fini          0x00000000080004c4        0x8 /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.15.0.201708311556/tools/compiler/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7e-m/fpv4-sp/hard/crtn.o
+                0x00000000080004cc                . = ALIGN (0x4)
+                0x00000000080004cc                _etext = .
 
-.vfp11_veneer   0x0000000008000438        0x0
- .vfp11_veneer  0x0000000008000438        0x0 linker stubs
+.vfp11_veneer   0x00000000080004cc        0x0
+ .vfp11_veneer  0x00000000080004cc        0x0 linker stubs
 
-.v4_bx          0x0000000008000438        0x0
- .v4_bx         0x0000000008000438        0x0 linker stubs
+.v4_bx          0x00000000080004cc        0x0
+ .v4_bx         0x00000000080004cc        0x0 linker stubs
 
-.iplt           0x0000000008000438        0x0
- .iplt          0x0000000008000438        0x0 /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.15.0.201708311556/tools/compiler/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7e-m/fpv4-sp/hard/crtbegin.o
+.iplt           0x00000000080004cc        0x0
+ .iplt          0x00000000080004cc        0x0 /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.15.0.201708311556/tools/compiler/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7e-m/fpv4-sp/hard/crtbegin.o
 
-.rodata         0x0000000008000438        0x4
-                0x0000000008000438                . = ALIGN (0x4)
+.rodata         0x00000000080004cc        0x4
+                0x00000000080004cc                . = ALIGN (0x4)
  *(.rodata)
  *(.rodata*)
  .rodata._global_impure_ptr
-                0x0000000008000438        0x4 /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.15.0.201708311556/tools/compiler/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard/libc.a(lib_a-impure.o)
-                0x0000000008000438                _global_impure_ptr
-                0x000000000800043c                . = ALIGN (0x4)
+                0x00000000080004cc        0x4 /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.15.0.201708311556/tools/compiler/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard/libc.a(lib_a-impure.o)
+                0x00000000080004cc                _global_impure_ptr
+                0x00000000080004d0                . = ALIGN (0x4)
 
-.rel.dyn        0x000000000800043c        0x0
- .rel.iplt      0x000000000800043c        0x0 /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.15.0.201708311556/tools/compiler/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7e-m/fpv4-sp/hard/crtbegin.o
+.rel.dyn        0x00000000080004d0        0x0
+ .rel.iplt      0x00000000080004d0        0x0 /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.15.0.201708311556/tools/compiler/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7e-m/fpv4-sp/hard/crtbegin.o
 
-.ARM.extab      0x000000000800043c        0x0
-                0x000000000800043c                . = ALIGN (0x4)
+.ARM.extab      0x00000000080004d0        0x0
+                0x00000000080004d0                . = ALIGN (0x4)
  *(.ARM.extab* .gnu.linkonce.armextab.*)
-                0x000000000800043c                . = ALIGN (0x4)
+                0x00000000080004d0                . = ALIGN (0x4)
 
-.ARM            0x000000000800043c        0x0
-                0x000000000800043c                . = ALIGN (0x4)
-                0x000000000800043c                __exidx_start = .
+.ARM            0x00000000080004d0        0x0
+                0x00000000080004d0                . = ALIGN (0x4)
+                0x00000000080004d0                __exidx_start = .
  *(.ARM.exidx*)
-                0x000000000800043c                __exidx_end = .
-                0x000000000800043c                . = ALIGN (0x4)
+                0x00000000080004d0                __exidx_end = .
+                0x00000000080004d0                . = ALIGN (0x4)
 
-.preinit_array  0x000000000800043c        0x0
-                0x000000000800043c                . = ALIGN (0x4)
-                0x000000000800043c                PROVIDE (__preinit_array_start, .)
+.preinit_array  0x00000000080004d0        0x0
+                0x00000000080004d0                . = ALIGN (0x4)
+                0x00000000080004d0                PROVIDE (__preinit_array_start, .)
  *(.preinit_array*)
-                0x000000000800043c                PROVIDE (__preinit_array_end, .)
-                0x000000000800043c                . = ALIGN (0x4)
+                0x00000000080004d0                PROVIDE (__preinit_array_end, .)
+                0x00000000080004d0                . = ALIGN (0x4)
 
-.init_array     0x000000000800043c        0x8
-                0x000000000800043c                . = ALIGN (0x4)
-                0x000000000800043c                PROVIDE (__init_array_start, .)
+.init_array     0x00000000080004d0        0x8
+                0x00000000080004d0                . = ALIGN (0x4)
+                0x00000000080004d0                PROVIDE (__init_array_start, .)
  *(SORT(.init_array.*))
  .init_array.00000
-                0x000000000800043c        0x4 /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.15.0.201708311556/tools/compiler/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard/libc.a(lib_a-__call_atexit.o)
+                0x00000000080004d0        0x4 /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.15.0.201708311556/tools/compiler/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard/libc.a(lib_a-__call_atexit.o)
  *(.init_array*)
- .init_array    0x0000000008000440        0x4 /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.15.0.201708311556/tools/compiler/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7e-m/fpv4-sp/hard/crtbegin.o
-                0x0000000008000444                PROVIDE (__init_array_end, .)
-                0x0000000008000444                . = ALIGN (0x4)
+ .init_array    0x00000000080004d4        0x4 /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.15.0.201708311556/tools/compiler/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7e-m/fpv4-sp/hard/crtbegin.o
+                0x00000000080004d8                PROVIDE (__init_array_end, .)
+                0x00000000080004d8                . = ALIGN (0x4)
 
-.fini_array     0x0000000008000444        0x4
-                0x0000000008000444                . = ALIGN (0x4)
-                0x0000000008000444                PROVIDE (__fini_array_start, .)
+.fini_array     0x00000000080004d8        0x4
+                0x00000000080004d8                . = ALIGN (0x4)
+                0x00000000080004d8                PROVIDE (__fini_array_start, .)
  *(SORT(.fini_array.*))
  *(.fini_array*)
- .fini_array    0x0000000008000444        0x4 /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.15.0.201708311556/tools/compiler/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7e-m/fpv4-sp/hard/crtbegin.o
-                0x0000000008000448                PROVIDE (__fini_array_end, .)
-                0x0000000008000448                . = ALIGN (0x4)
-                0x0000000008000448                _sidata = LOADADDR (.data)
+ .fini_array    0x00000000080004d8        0x4 /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.15.0.201708311556/tools/compiler/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7e-m/fpv4-sp/hard/crtbegin.o
+                0x00000000080004dc                PROVIDE (__fini_array_end, .)
+                0x00000000080004dc                . = ALIGN (0x4)
+                0x00000000080004dc                _sidata = LOADADDR (.data)
 
-.data           0x0000000020000000      0x434 load address 0x0000000008000448
+.data           0x0000000020000000      0x4b4 load address 0x00000000080004dc
                 0x0000000020000000                . = ALIGN (0x4)
                 0x0000000020000000                _sdata = .
  *(.data)
- .data          0x0000000020000000        0x8 src/main.o
+ .data          0x0000000020000000       0x88 src/main.o
  *(.data*)
  .data.impure_data
-                0x0000000020000008      0x428 /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.15.0.201708311556/tools/compiler/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard/libc.a(lib_a-impure.o)
+                0x0000000020000088      0x428 /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.15.0.201708311556/tools/compiler/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard/libc.a(lib_a-impure.o)
  .data.__atexit_recursive_mutex
-                0x0000000020000430        0x4 /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.15.0.201708311556/tools/compiler/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard/libc.a(lib_a-__call_atexit.o)
-                0x0000000020000430                __atexit_recursive_mutex
-                0x0000000020000434                . = ALIGN (0x4)
-                0x0000000020000434                _edata = .
+                0x00000000200004b0        0x4 /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.15.0.201708311556/tools/compiler/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard/libc.a(lib_a-__call_atexit.o)
+                0x00000000200004b0                __atexit_recursive_mutex
+                0x00000000200004b4                . = ALIGN (0x4)
+                0x00000000200004b4                _edata = .
 
-.jcr            0x0000000020000434        0x0 load address 0x000000000800087c
- .jcr           0x0000000020000434        0x0 /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.15.0.201708311556/tools/compiler/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7e-m/fpv4-sp/hard/crtbegin.o
+.jcr            0x00000000200004b4        0x0 load address 0x0000000008000990
+ .jcr           0x00000000200004b4        0x0 /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.15.0.201708311556/tools/compiler/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7e-m/fpv4-sp/hard/crtbegin.o
 
-.igot.plt       0x0000000020000434        0x0 load address 0x000000000800087c
- .igot.plt      0x0000000020000434        0x0 /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.15.0.201708311556/tools/compiler/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7e-m/fpv4-sp/hard/crtbegin.o
-                0x0000000020000434                . = ALIGN (0x4)
+.igot.plt       0x00000000200004b4        0x0 load address 0x0000000008000990
+ .igot.plt      0x00000000200004b4        0x0 /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.15.0.201708311556/tools/compiler/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7e-m/fpv4-sp/hard/crtbegin.o
+                0x00000000200004b4                . = ALIGN (0x4)
 
-.bss            0x0000000020000434       0x40 load address 0x000000000800087c
-                0x0000000020000434                _sbss = .
-                0x0000000020000434                __bss_start__ = _sbss
+.bss            0x00000000200004b4       0x40 load address 0x0000000008000990
+                0x00000000200004b4                _sbss = .
+                0x00000000200004b4                __bss_start__ = _sbss
  *(.bss)
- .bss           0x0000000020000434       0x1c /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.15.0.201708311556/tools/compiler/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7e-m/fpv4-sp/hard/crtbegin.o
+ .bss           0x00000000200004b4       0x1c /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.15.0.201708311556/tools/compiler/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7e-m/fpv4-sp/hard/crtbegin.o
  *(.bss*)
  *(COMMON)
- COMMON         0x0000000020000450       0x21 /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.15.0.201708311556/tools/compiler/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard/libc.a(lib_a-lock.o)
-                0x0000000020000450                __lock___atexit_recursive_mutex
-                0x0000000020000454                __lock___arc4random_mutex
-                0x0000000020000458                __lock___env_recursive_mutex
-                0x000000002000045c                __lock___sinit_recursive_mutex
-                0x0000000020000460                __lock___malloc_recursive_mutex
-                0x0000000020000464                __lock___at_quick_exit_mutex
-                0x0000000020000468                __lock___dd_hash_mutex
-                0x000000002000046c                __lock___tz_mutex
-                0x0000000020000470                __lock___sfp_recursive_mutex
-                0x0000000020000474                . = ALIGN (0x4)
- *fill*         0x0000000020000471        0x3 
-                0x0000000020000474                _ebss = .
-                0x0000000020000474                __bss_end__ = _ebss
+ COMMON         0x00000000200004d0       0x21 /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.15.0.201708311556/tools/compiler/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard/libc.a(lib_a-lock.o)
+                0x00000000200004d0                __lock___atexit_recursive_mutex
+                0x00000000200004d4                __lock___arc4random_mutex
+                0x00000000200004d8                __lock___env_recursive_mutex
+                0x00000000200004dc                __lock___sinit_recursive_mutex
+                0x00000000200004e0                __lock___malloc_recursive_mutex
+                0x00000000200004e4                __lock___at_quick_exit_mutex
+                0x00000000200004e8                __lock___dd_hash_mutex
+                0x00000000200004ec                __lock___tz_mutex
+                0x00000000200004f0                __lock___sfp_recursive_mutex
+                0x00000000200004f4                . = ALIGN (0x4)
+ *fill*         0x00000000200004f1        0x3 
+                0x00000000200004f4                _ebss = .
+                0x00000000200004f4                __bss_end__ = _ebss
 
 ._user_heap_stack
-                0x0000000020000474      0x404 load address 0x000000000800087c
-                0x0000000020000478                . = ALIGN (0x8)
- *fill*         0x0000000020000474        0x4 
-                0x0000000020000478                PROVIDE (end, .)
+                0x00000000200004f4      0x404 load address 0x0000000008000990
+                0x00000000200004f8                . = ALIGN (0x8)
+ *fill*         0x00000000200004f4        0x4 
+                0x00000000200004f8                PROVIDE (end, .)
                 [!provide]                        PROVIDE (_end, .)
-                0x0000000020000478                . = (. + _Min_Heap_Size)
-                0x0000000020000878                . = (. + _Min_Stack_Size)
- *fill*         0x0000000020000478      0x400 
-                0x0000000020000878                . = ALIGN (0x8)
+                0x00000000200004f8                . = (. + _Min_Heap_Size)
+                0x00000000200008f8                . = (. + _Min_Stack_Size)
+ *fill*         0x00000000200004f8      0x400 
+                0x00000000200008f8                . = ALIGN (0x8)
 
 /DISCARD/
  libc.a(*)
@@ -447,9 +448,9 @@ LOAD /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools
                 0x000000000000020c       0x22 /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.15.0.201708311556/tools/compiler/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7e-m/fpv4-sp/hard/crtn.o
 OUTPUT(Lab1.elf elf32-littlearm)
 
-.debug_line     0x0000000000000000       0xe9
- .debug_line    0x0000000000000000       0x70 src/main.o
- .debug_line    0x0000000000000070       0x79 startup/startup_stm32.o
+.debug_line     0x0000000000000000      0x10d
+ .debug_line    0x0000000000000000       0x94 src/main.o
+ .debug_line    0x0000000000000094       0x79 startup/startup_stm32.o
 
 .debug_info     0x0000000000000000       0xcf
  .debug_info    0x0000000000000000       0x63 src/main.o
