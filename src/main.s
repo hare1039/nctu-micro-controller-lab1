@@ -5,22 +5,22 @@
 .data
 	arr: .byte 0b01111110, 0b00110000, 0b01101101, 0b01111001, 0b00110011, 0b01011011, 0b01011111, 0b01110000, 0b01111111, 0b01111011, 0b01110111, 0b00011111, 0b01001110, 0b00111101, 0b01001111, 0b01000111
 	ONE_SEC: .word 800000
-	@ arr: a0, 1, 2, 3, 4, 5, 6, 7, 8, 9, A, b, C, d, E, F
+	// arr: a0, 1, 2, 3, 4, 5, 6, 7, 8, 9, A, b, C, d, E, F
 
 .text
 	.global main
 
 	.equ RCC_AHB2ENR,  0x4002104C
 
-	.equ DECODE_MODE,  9
-	.equ DISPLAY_TEST, 15
-	.equ SCAN_LIMIT,   11
-	.equ INTENSITY,    10
-	.equ SHUTDOWN,     12
+	.equ DECODE_MODE,  0b00001001
+	.equ DISPLAY_TEST, 0b00001111
+	.equ SCAN_LIMIT,   0b00001011
+	.equ INTENSITY,    0b00001010
+	.equ SHUTDOWN,     0b00001100
 
-	.equ MAX7219_DIN,  32 @ PA5
-	.equ MAX7219_CS,   64 @ PA6
-	.equ MAX7219_CLK,  128 @ PA7
+	.equ MAX7219_DIN,  32 // PA5
+	.equ MAX7219_CS,   64 // PA6
+	.equ MAX7219_CLK,  128 // PA7
 
 	.equ GPIOA_BASE,   0x48000000
 	.equ BSRR_OFFSET,  24
@@ -31,7 +31,7 @@ gpio_init:
 	ldr r1, =RCC_AHB2ENR
 	str r0, [r1]
 
-	ldr r1, =GPIOA_BASE @ GPIOA_MODER
+	ldr r1, =GPIOA_BASE // GPIOA_MODER
 	ldr r2, [r1]
 	and r2, 0b11111111111111110000001111111111
 	orr r2, 0b00000000000000000101010000000000
@@ -114,36 +114,37 @@ main:
 
 
 MAX7219_send:
-	@ input parameter: r0 is ADDRESS , r1 is DATA
+	// input parameter: r0 is ADDRESS , r1 is DATA
 	push {r0, r1, r2, r3, r4, r5, r6, r7, r8, lr}
-	lsl  r0, r0, 0x8
-	add  r0, r1
-	ldr  r1, =GPIOA_BASE
-	ldr  r2, =MAX7219_CS
-	ldr  r3, =MAX7219_DIN
-	ldr  r4, =MAX7219_CLK
-	ldr  r5, =BSRR_OFFSET
-	ldr  r6, =BRR_OFFSET
-	ldr  r7, =0x0F @ currently sending r7-th bit
+	lsl r0, r0, #8
+	add r0, r1
+	ldr r1, =GPIOA_BASE
+	ldr r3, =MAX7219_DIN
+	ldr r4, =MAX7219_CLK
+	ldr r5, =BSRR_OFFSET
+	ldr r6, =BRR_OFFSET
+	ldr r7, =#15 // currently sending r7-th bit
 
 MAX7219_send_loop:
-	mov  r8, 0x1
-	lsl  r8, r8, r7
-	str  r4, [r1, r6] @ clk -> 0
-	tst  r0, r8 @ ANDS but discard result
-	beq  MAX7219_send_clear_bit
-	str  r3, [r1, r5] @ din -> 1
-	b    MAX7219_send_check_done
-
-MAX7219_send_clear_bit:
-	str  r3, [r1, r6] @ din -> 0
-
-MAX7219_send_check_done:
-	str  r4, [r1, r5] @ clk -> 1
-	subs r7, 0x1
-	bge  MAX7219_send_loop
-	str  r2, [r1, r6] @ cs -> 0
-	str  r2, [r1, r5] @ cs -> 1
-	pop  {r0, r1, r2, r3, r4, r5, r6, r7, r8, pc}
+	mov r2, #1
+	lsl r2, r2, r7
+	str r4, [r1, r6] // clk -> 0
+	tst r0, r2 // ANDS but discard result
+	beq MAX7219_IF_ENDS
+	b MAX7219_IF_NOT_ENDS
+	MAX7219_IF_ENDS:
+		str r3, [r1, r6] // din -> 0
+		b END_MAX7219_IF_ENDS
+	MAX7219_IF_NOT_ENDS:
+		str r3, [r1, r5] // din -> 1
+		b END_MAX7219_IF_ENDS
+	END_MAX7219_IF_ENDS:
+	str r4, [r1, r5] // clk -> 1
+	subs r7, #1
+	bge MAX7219_send_loop
+	ldr r2, =MAX7219_CS
+	str r2, [r1, r6] // cs -> 0
+	str r2, [r1, r5] // cs -> 1
+	pop {r0, r1, r2, r3, r4, r5, r6, r7, r8, pc}
 
 

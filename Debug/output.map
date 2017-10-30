@@ -448,9 +448,9 @@ LOAD /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools
                 0x000000000000020c       0x22 /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.15.0.201708311556/tools/compiler/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7e-m/fpv4-sp/hard/crtn.o
 OUTPUT(Lab1.elf elf32-littlearm)
 
-.debug_line     0x0000000000000000      0x112
- .debug_line    0x0000000000000000       0x99 src/main.o
- .debug_line    0x0000000000000099       0x79 startup/startup_stm32.o
+.debug_line     0x0000000000000000      0x114
+ .debug_line    0x0000000000000000       0x9b src/main.o
+ .debug_line    0x000000000000009b       0x79 startup/startup_stm32.o
 
 .debug_info     0x0000000000000000       0xcf
  .debug_info    0x0000000000000000       0x63 src/main.o
