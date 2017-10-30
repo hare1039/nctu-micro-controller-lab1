@@ -3,8 +3,8 @@
 	.thumb
 
 .data
-	//student_id: .byte 0, 4, 1, 3, 2, 2, 0 //TODO: put your student id here
-	student_id: .byte 0, 4, 1, 3, 2, 4, 9 //TODO: put your student id here
+	student_id: .byte 0, 4, 1, 3, 2, 2, 0 //TODO: put your student id here
+	//student_id: .byte 0, 4, 1, 3, 2, 4, 9 //TODO: put your student id here
 .text
 	.global main
 
@@ -108,28 +108,35 @@ MAX7219_send:
 		pop {r0, r1, r2, r3, r4, r5, r6, r7, r8, pc}
 
 
+display:
+	mov r0, #1
+	mov r2, #6
+	ldr r3, =student_id
+
+	REFRASH_WHILE:
+		ldrb r1, [r3, r2]
+		bl MAX7219_send
+
+		cmp r2, #0
+		beq IF_FINISHED
+		b IF_FINISHED_ELSE
+		IF_FINISHED:
+			mov r0, #1
+			mov r2, #6
+			b END_IF_FINISHED
+		IF_FINISHED_ELSE:
+			add r0, r0, #1
+			sub r2, r2, #1
+		END_IF_FINISHED:
+	b REFRASH_WHILE
+
+
+
+
 main:
-    BL   GPIO_init
-    BL   MAX7219_init
-
-	mov  r0, #1
-	mov  r2, #6
-	ldr  r3, =student_id
-	b    loop
-
-loop:
-	ldrb r1, [r3, r2]
-	bl   MAX7219_send
-
-	add  r0, #1
-	sub  r2, #1
-	cmp  r2, #-1
-	bne  loop
-
-	mov  r0, #1
-	mov  r2, #6
-	b    loop
-
+	BL GPIO_init
+	BL MAX7219_init
+	BL display
 
 Program_end:
 	B Program_end
