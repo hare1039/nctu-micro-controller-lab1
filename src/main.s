@@ -10,6 +10,7 @@
 	feb_second: .word 1
 	top_found: .word 0
 	ONE_SEC: .word 800000
+
 .text
 	.global main
 
@@ -238,10 +239,32 @@ delay:
 	pop {r0}
 	BX LR
 
+reset_display_feb:
+	PUSH {r0, r1}
+	mov r0, #0
+	ldr r1, =display_data
+	strb r0, [r1, #0]
+	strb r0, [r1, #1]
+	strb r0, [r1, #2]
+	strb r0, [r1, #3]
+	strb r0, [r1, #4]
+	strb r0, [r1, #5]
+	strb r0, [r1, #6]
+	strb r0, [r1, #7]
+	ldr r1, =feb_first
+	str r0, [r1]
+	ldr r1, =display_limit
+	str r0, [r1]
+	ldr r1, =feb_second
+	mov r0, #1
+	str r0, [r1]
+	PUSH {r0, r1}
+	BX LR
 
 main:
 	BL GPIO_init
 	BL MAX7219_init
+	BL reset_display_feb
 	BL display
 	loooop:
 		BL delay
