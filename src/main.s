@@ -8,8 +8,10 @@
 	ten_million: .word 10000000
 	feb_first: .word 0
 	feb_second: .word 1
+	feb_max: .word 90000000
 	top_found: .word 0
 	ONE_SEC: .word 800000
+
 
 .text
 	.global main
@@ -27,11 +29,12 @@
 	.equ MAX7219_CLK,  128 // PA7
 
 	.equ GPIOA_BASE,   0x48000000
+	.equ GPIOC_BASE,   0x48000800
 	.equ BSRR_OFFSET,  24
 	.equ BRR_OFFSET,   40
 
 GPIO_init:
-	mov r0, 0b00000000000000000000000000000001
+	mov r0, 0b00000000000000000000000000000101
 	ldr r1, =RCC_AHB2ENR
 	str r0, [r1]
 
@@ -52,6 +55,11 @@ GPIO_init:
 	orr r2, 0b00000000000000000101010000000000
 	str r2, [r1]
 
+    ldr r1, =GPIOC_BASE 
+    ldr r2, [r1]
+    and r2, 0b11110011111111111111111111111111
+    str r2, [r1]
+    add r10, r1, 0x10
 	bx lr
 
 MAX7219_init:
@@ -149,19 +157,29 @@ display:
 	bx lr
 
 do_feb:
-	PUSH {r0, r1, r2}
+	PUSH {r0, r1, r2, r3}
 	ldr r0, =feb_first
 	ldr r0, [r0]
 	ldr r1, =feb_second
 	ldr r1, [r1]
 	add r2, r0, r1
-	// if (r2 >= ...) ...
+	ldr r3, =feb_max
+	ldr r3, [r3]
+	cmp r1, r3
+	bgt REACHES_MAX
+	b NOT_REACHES_MAX
+	REACHES_MAX:
+		ldr r0, =feb_first
+		str r3, [r0]
+		b END_REACHES_MAX
+	NOT_REACHES_MAX:
+		ldr r0, =feb_first
+		str r1, [r0]
+		ldr r1, =feb_second
+		str r2, [r1]
+	END_REACHES_MAX:
 
-	ldr r0, =feb_first
-	str r1, [r0]
-	ldr r1, =feb_second
-	str r2, [r1]
-	POP {r0, r1, r2}
+	POP {r0, r1, r2, r3}
 	bx lr
 
 set_display_array:
@@ -261,22 +279,75 @@ reset_display_feb:
 	PUSH {r0, r1}
 	BX LR
 
+check_button_init:
+    ldr r0, =4000000
+    movs r0, r0
+    b check_button_delay
+
+check_button_delay:
+    beq check_button_init
+    ldr r1, =0b11111111111111111
+    ands r1, r0
+    beq check_button
+    subs r0, #8
+    b check_button_delay
+
+check_button:
+    // r10 gpio button input
+    // r11 latest button value
+    // r12 confirmed button value
+    ldrh r1, [r10]
+    lsr  r1, 13
+    mov  r4, 1
+    ands r1, r4
+    beq  check_button_increment
+    cmp  r9, 31
+    bge  LONG_BUTTON_PRESSED
+    mov  r9, 0
+    cmp  r1, r11
+    mov  r11, r1
+    beq  check_button_confirmed
+    subs r0, 8
+    b    check_button_delay
+check_button_increment:
+    add  r9, 1
+    cmp  r1, r11
+    mov  r11, r1
+    beq  check_button_confirmed
+    subs r0, 8
+    b    check_button_delay
+ 
+check_button_confirmed:
+    subs r1, r11, r12
+    cmp  r1, 1
+    mov  r12, r11
+    beq  check_button_end
+    subs r0, 8
+    b    check_button_delay
+check_button_end:
+	bx   lr
+
+LONG_BUTTON_PRESSED:
+	bl reset_display_feb
+	b main
+
 main:
+    mov  r9, #0  // counter for long press
+    mov  r11, #1
+    mov  r12, #1
 	BL GPIO_init
 	BL MAX7219_init
 	BL reset_display_feb
 	BL display
 	loooop:
-		BL delay
+		//BL delay
+		mov r9, 0x0
+		mov r11, 0x1
+		mov r12, 0x1
+		bl check_button_init
 		BL do_feb
 		BL set_display_array
 		BL display
 	b loooop
-
-
-Program_end:
-	B Program_end
-
-
 
 
