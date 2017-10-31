@@ -188,6 +188,12 @@ set_display_array:
 	ldr r0, [r0]
 	cmp r0, #0
 	beq FEB_ZERO_SPECIAL_CASE
+
+	ldr r2, =feb_max
+	ldr r2, [r2]
+	cmp r0, r2
+	beq FEB_EXPLOSION_SPECIAL_CASE
+
 	ldr r2, =ten_million
 	ldr r2, [r2]
 
@@ -236,9 +242,20 @@ set_display_array:
 	END_WHILE_GET_NUM:
 	POP {r0-r7}
 	bx lr
+	// two special cases for function do_feb; I don't know where to put it, so here o'v'o
 	FEB_ZERO_SPECIAL_CASE:
 		ldr r1, =display_data
 		strb r0, [r1, #7]
+		ldr r1, =display_limit
+		mov r0, #0
+		str r0, [r1]
+		b END_WHILE_GET_NUM
+	FEB_EXPLOSION_SPECIAL_CASE:
+		ldr r1, =display_data
+		mov r0, #1
+		strb r0, [r1, #7]
+		mov r0, #10
+		strb r0, [r1, #6]
 		ldr r1, =display_limit
 		mov r0, #1
 		str r0, [r1]
