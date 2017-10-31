@@ -3,8 +3,13 @@
 	.thumb
 
 .data
-	student_id: .byte 0, 4, 1, 3, 2, 2, 0 //TODO: put your student id here
-	//student_id: .byte 0, 4, 1, 3, 2, 4, 9 //TODO: put your student id here
+	display_data: .byte 0, 0, 0, 0, 0, 0, 0, 0 //TODO: put your student id here
+	display_limit: .word 0
+	ten_million: .word 10000000
+	feb_first: .word 0
+	feb_second: .word 1
+	top_found: .word 0
+	ONE_SEC: .word 800000
 .text
 	.global main
 
@@ -60,7 +65,7 @@ MAX7219_init:
 	bl MAX7219_send
 
 	ldr r0, =SCAN_LIMIT
-	ldr r1, =6
+	ldr r1, =7
 	bl MAX7219_send
 
 	ldr r0, =INTENSITY
@@ -109,9 +114,18 @@ MAX7219_send:
 
 
 display:
+	PUSH {r0-r3, lr}
+	PUSH {r1}
+	ldr r0, =SCAN_LIMIT
+	ldr r2, =display_limit
+	ldr r2, [r2]
+	mov r1, r2
+	bl MAX7219_send
+	POP {r1}
+
 	mov r0, #1
-	mov r2, #6
-	ldr r3, =student_id
+	mov r2, #7
+	ldr r3, =display_data
 
 	REFRASH_WHILE:
 		ldrb r1, [r3, r2]
@@ -122,21 +136,120 @@ display:
 		b IF_FINISHED_ELSE
 		IF_FINISHED:
 			mov r0, #1
-			mov r2, #6
-			b END_IF_FINISHED
+			mov r2, #7
+			b END_REFRASH_WHILE
 		IF_FINISHED_ELSE:
 			add r0, r0, #1
 			sub r2, r2, #1
 		END_IF_FINISHED:
-	b REFRASH_WHILE
+		b REFRASH_WHILE
+	END_REFRASH_WHILE:
+	POP {r0-r3, pc}
+	bx lr
 
+do_feb:
+	PUSH {r0, r1, r2}
+	ldr r0, =feb_first
+	ldr r0, [r0]
+	ldr r1, =feb_second
+	ldr r1, [r1]
+	add r2, r0, r1
+	// if (r2 >= ...) ...
 
+	ldr r0, =feb_first
+	str r1, [r0]
+	ldr r1, =feb_second
+	str r2, [r1]
+	POP {r0, r1, r2}
+	bx lr
+
+set_display_array:
+	PUSH {r0-r7}
+	ldr r0, =feb_first
+	ldr r0, [r0]
+	cmp r0, #0
+	beq FEB_ZERO_SPECIAL_CASE
+	ldr r2, =ten_million
+	ldr r2, [r2]
+
+	ldr r3, =display_limit
+	mov r4, #7 // number head
+	str r4, [r3]
+	ldr r4, =display_data
+	mov r5, #0 // array pos @ 0
+	ldr r6, =top_found // == false
+	str r5, [r6]
+
+	WHILE_GET_NUM:
+		udiv r1, r0, r2
+
+		strb r1, [r4, r5]
+		cmp r1, #0
+		bne NON_ZERO_NUM_FOUND
+		b ZERO_NUM_FOUND
+		NON_ZERO_NUM_FOUND:
+			ldr r6, =top_found
+			ldr r6, [r6]
+			cmp r6, #0
+			beq SET_FOUND_AND_TOP_NUM
+			b END_SET_FOUND_AND_TOP_NUM
+			SET_FOUND_AND_TOP_NUM:
+				ldr r6, =top_found
+				mov r7, #1
+				str r7, [r6]
+				ldr r6, =display_limit
+				mov r7, #7
+				sub r7, r7, r5
+				str r7, [r6]
+			END_SET_FOUND_AND_TOP_NUM:
+			b END_NON_ZERO_NUM_FOUND
+		ZERO_NUM_FOUND:
+
+		END_NON_ZERO_NUM_FOUND:
+		add r5, r5, #1
+		mul r6, r1, r2
+		sub r0, r0, r6
+		mov r7, #10
+		udiv r2, r2, r7
+		cmp r5, #8
+		beq END_WHILE_GET_NUM // break
+		b WHILE_GET_NUM
+	END_WHILE_GET_NUM:
+	POP {r0-r7}
+	bx lr
+	FEB_ZERO_SPECIAL_CASE:
+		ldr r1, =display_data
+		strb r0, [r1, #7]
+		ldr r1, =display_limit
+		mov r0, #1
+		str r0, [r1]
+		b END_WHILE_GET_NUM
+
+delay:
+	push {r0}
+	ldr r0, =ONE_SEC
+	ldr r0, [r0]
+	WHILE_LOOP_DELAY:
+		cmp r0, #0
+		beq END_WHILE_LOOP_DELAY
+		sub r0, r0, #1
+		b WHILE_LOOP_DELAY
+	END_WHILE_LOOP_DELAY:
+	pop {r0}
+	BX LR
 
 
 main:
 	BL GPIO_init
 	BL MAX7219_init
 	BL display
+	loooop:
+		BL delay
+		BL do_feb
+		BL set_display_array
+		BL display
+	b loooop
+
 
 Program_end:
 	B Program_end
