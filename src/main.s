@@ -29,33 +29,47 @@
 	.global main
 
 GPIO_INIT:
-	PUSH {r0, r1}
+	PUSH {r0-r2}
 	ldr r0, =RCC_AHB2ENR
 	mov r1, #0b0110
 	str r1, [r0]
 
 	ldr r0, =GPIOB_MODER
-	mov r1, #0b00000000000000000000000001010101
+	ldr r1, [r0]
+	mov r2, #0b11111111111111111111111101010101
+	and r1, r1, r2
 	str r1, [r0]
 
-	POP {r0, r1}
+	POP {r0-r2}
 	bx lr
 
-SET_VAL_A: // PB3 -> 1
+B_SET_ONE_AT: // r0:pos
 	PUSH {r0-r3}
-	ldr r2, =GPIOB_ODR
-	mov r3, #0xFFFFFFF
-	str r3, [r2]
-
+	ldr r1, =GPIOB_ODR
+	mov r3, #1
+	lsl r3, r3, r0
+	mov r3, #0xFFFFFFFF
+	strh r3, [r1]
 	POP {r0-r3}
 	bx lr
 
 main:
 	bl GPIO_INIT
-	bl SET_VAL_A
+	b loop
 
 loop:
-	bl SET_VAL_A
+	mov r0, #0
+	bl B_SET_ONE_AT
+	mov r0, #1
+	bl B_SET_ONE_AT
+	mov r0, #2
+	bl B_SET_ONE_AT
+	mov r0, #3
+	bl B_SET_ONE_AT
+	mov r0, #4
+	bl B_SET_ONE_AT
+	mov r0, #5
+	bl B_SET_ONE_AT
 	b loop
 
 
