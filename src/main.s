@@ -31,14 +31,24 @@
 GPIO_INIT:
 	PUSH {r0-r2}
 	ldr r0, =RCC_AHB2ENR
-	mov r1, #0b0110
+	mov r1, #0b0111
 	str r1, [r0]
 
 	ldr r0, =GPIOB_MODER
 	ldr r1, [r0]
-	mov r2, #0b11111111111111111111111101010101
+	mov r2, #0xFFFFFEBF
 	and r1, r1, r2
 	str r1, [r0]
+
+//	mov r0, #0x400
+	mov r0, #0b00000000000000000000010000000000
+	ldr r1, =GPIOA_MODER
+	ldr r2, [r1]
+//	and r2, #0xFFFFF3FF
+	and r2, #0b11111111111111111111001111111111
+	orr r2, r2, r0
+	str r2, [r1]
+
 
 	POP {r0-r2}
 	bx lr
@@ -58,18 +68,9 @@ main:
 	b loop
 
 loop:
-	mov r0, #0
-	bl B_SET_ONE_AT
-	mov r0, #1
-	bl B_SET_ONE_AT
-	mov r0, #2
-	bl B_SET_ONE_AT
-	mov r0, #3
-	bl B_SET_ONE_AT
-	mov r0, #4
-	bl B_SET_ONE_AT
-	mov r0, #5
-	bl B_SET_ONE_AT
+	ldr r1, =GPIOA_ODR
+	mov r0, #(1<<5)
+	strh r0, [r1]
 	b loop
 
 
