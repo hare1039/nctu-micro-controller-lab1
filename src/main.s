@@ -27,8 +27,33 @@
 	.equ GPIOA_IDR,    0x48000010
     .equ GPIOA_ODR,    0x48000014
 
+gpio_init:
+	mov  r0, 0b00000000000000000000000000000001
+	ldr  r1, =RCC_AHB2ENR
+	str  r0, [r1]
+
+	ldr  r1, =GPIOA_MODER @ GPIOA_MODER
+	ldr  r2, [r1]
+	and  r2, 0b11111111111111111111110000000011
+	orr  r2, 0b00000000000000000000000101010100
+	str  r2, [r1]
+
+	add  r1, 0x4 @ GPIOA_OTYPER
+	ldr  r2, [r1]
+	and  r2, 0b11111111111111111111111111100000
+	str  r2, [r1]
+
+	add  r1, 0x4 @ GPIOA_SPEEDER
+	ldr  r2, [r1]
+	and  r2, 0b11111111111111111111110000000011
+	orr  r2, 0b00000000000000000000000101010100
+	str  r2, [r1]
+
+	bx   lr
+
+
 main:
-    BL      GPIO_init
+    BL      gpio_init
     ldr r0, =GPIOA_ODR
     mov r1, 0xFFFFFFFF
     str r1, [r0]
@@ -80,57 +105,6 @@ loop_main:
     BL      delay
     B       loop
 
-GPIO_init:
-    // 1. Enable the GPIO Clock controlled by AHB2
-    mov     %r0, #0x0002
-    ldr     %r1, =RCC_AHB2ENR
-    ldr     %r2, [r1]
-    orr     %r0, %r0, %r2
-    str     %r0, [r1]
-
-    // 2. Set GPIO-B 3..6 to General purpose output mode (0x01)
-    //    Set to     ----_----_----_----_--01_0101_01--_----
-    //    keep mask: 1111_1111_1111_1111_1100_0000_0011_1111 => 0xffffc03f
-    //    set mask:  0000_0000_0000_0000_0001_0101_0100_0000 => 0x00001540
-    mov     %r0, #0b00000000000000000000000101010100
-    ldr     %r1, =GPIOA_MODER
-    ldr     %r2, [%r1]
-    and     %r2, #0b11111111111111111111111000000011
-    orr     %r0, %r0, %r2
-    str     %r0, [%r1]
-
-    // 3. Set GPIO-B 3..6 to Open drain (0x1)
-    //    Set to:    ----_----_----_----_----_----_-111_1---
-    //    keep mask: 1111_1111_1111_1111_1111_1111_1000_0111 => 0xffffff87
-    //    set mask:  0000_0000_0000_0000_0000_0000_0111_1000 => 0x00000078
-    //    * Since all bits are going to set to 1, keep mask is redundant
-    // 00000000000000000000000000011110
-    mov     %r0, #0b11111111111111111111111111100001
-    ldr     %r1, =GPIOA_OTYPER
-    ldr     %r2, [%r1]
-    orr     %r0, %r0, %r2
-    str     %r0, [%r1]
-
-    // 4. Set GPIO-B 3..6 to High Speed (0x10)
-    //    Set to     ----_----_----_----_--10_1010_10--_---
-    //    keep mask: 1111_1111_1111_1111_1100_0000_0011_1111 => 0xffffc03f
-    //    set mask:  0000_0000_0000_0000_0010_1010_1000_0000 => 0x00002a80
-    mov     %r0, #0b00000000000000000000001010101000
-    ldr     %r1, =GPIOA_OSPEEDR
-    ldr     %r2, [%r1]
-    and     %r2, #0b11111111111111111111110000000011
-    orr     %r0, %r0, %r2
-    str     %r0, [%r1]
-
-    // 5. Set GPIO-B 3..6 to No Pull (0x00) (Default)
-	mov     %r0, #0b00000000000000000000000101010100
-    ldr     %r1, =GPIOA_PUPDR
-    ldr     %r2, [%r1]
-    and     %r2, #0b11111111111111111111110000000011
-    orr     %r0, %r0, %r2
-    str     %r0, [%r1]
-    // 6. All Done, return
-    BX      %lr
 
     // Display LED Pattern module
 DisplayLED:
