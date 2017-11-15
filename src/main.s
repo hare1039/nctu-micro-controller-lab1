@@ -29,6 +29,10 @@
 
 main:
     BL      GPIO_init
+    ldr r0, =GPIOA_ODR
+    mov r1, 0xFFFFFFFF
+    str r1, [r0]
+    b main
     MOVS    %r1, #1     // start form the right most position
     LDR     %r0, =leds
     STRB    %r1, [R0]
@@ -100,7 +104,8 @@ GPIO_init:
     //    keep mask: 1111_1111_1111_1111_1111_1111_1000_0111 => 0xffffff87
     //    set mask:  0000_0000_0000_0000_0000_0000_0111_1000 => 0x00000078
     //    * Since all bits are going to set to 1, keep mask is redundant
-    mov     %r0, #0b00000000000000000000000000011110
+    // 00000000000000000000000000011110
+    mov     %r0, #0b11111111111111111111111111100001
     ldr     %r1, =GPIOA_OTYPER
     ldr     %r2, [%r1]
     orr     %r0, %r0, %r2
@@ -118,7 +123,12 @@ GPIO_init:
     str     %r0, [%r1]
 
     // 5. Set GPIO-B 3..6 to No Pull (0x00) (Default)
-
+	mov     %r0, #0b00000000000000000000000101010100
+    ldr     %r1, =GPIOA_PUPDR
+    ldr     %r2, [%r1]
+    and     %r2, #0b11111111111111111111110000000011
+    orr     %r0, %r0, %r2
+    str     %r0, [%r1]
     // 6. All Done, return
     BX      %lr
 
