@@ -40,7 +40,7 @@ gpio_init:
 
 	add  r1, 0x4 @ GPIOA_OTYPER
 	ldr  r2, [r1]
-	and  r2, 0b11111111111111111111111111100000
+	and  r2, 0b11111111111111111111111111100001
 	str  r2, [r1]
 
 	add  r1, 0x4 @ GPIOA_SPEEDER
@@ -55,9 +55,9 @@ gpio_init:
 main:
     BL      gpio_init
     ldr r0, =GPIOA_ODR
-    mov r1, 0xFFFFFFFF
+    mov r1, 0x0000FFFF
     str r1, [r0]
-    b main
+	b main
     MOVS    %r1, #1     // start form the right most position
     LDR     %r0, =leds
     STRB    %r1, [R0]
