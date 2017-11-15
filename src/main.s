@@ -18,13 +18,14 @@
 .text
     .global main
 
-    .equ RCC_AHB2ENR,    0x4002104C
-    .equ GPIOB_BOUNDARY, 0x48000400
-    .equ GPIOB_MODER,    0x00 + GPIOB_BOUNDARY
-    .equ GPIOB_OTYPER,   0x04 + GPIOB_BOUNDARY
-    .equ GPIOB_OSPEEDR,  0x08 + GPIOB_BOUNDARY
-    .equ GPIOB_PUPDR,    0x0C + GPIOB_BOUNDARY
-    .equ GPIOB_ODR,      0x14 + GPIOB_BOUNDARY
+    .equ RCC_AHB2ENR,  0x4002104C
+
+    .equ GPIOA_MODER,  0x48000000
+    .equ GPIOA_OTYPER, 0x48000004
+    .equ GPIOA_OSPEEDR,0x48000008
+    .equ GPIOA_PUPDR,  0x4800000C
+	.equ GPIOA_IDR,    0x48000010
+    .equ GPIOA_ODR,    0x48000014
 
 main:
     BL      GPIO_init
@@ -87,10 +88,10 @@ GPIO_init:
     //    Set to     ----_----_----_----_--01_0101_01--_----
     //    keep mask: 1111_1111_1111_1111_1100_0000_0011_1111 => 0xffffc03f
     //    set mask:  0000_0000_0000_0000_0001_0101_0100_0000 => 0x00001540
-    mov     %r0, #0x00001540
-    ldr     %r1, =GPIOB_MODER
+    mov     %r0, #0b00000000000000000000000101010100
+    ldr     %r1, =GPIOA_MODER
     ldr     %r2, [%r1]
-    and     %r2, #0xffffc03f
+    and     %r2, #0b11111111111111111111111000000011
     orr     %r0, %r0, %r2
     str     %r0, [%r1]
 
@@ -99,8 +100,8 @@ GPIO_init:
     //    keep mask: 1111_1111_1111_1111_1111_1111_1000_0111 => 0xffffff87
     //    set mask:  0000_0000_0000_0000_0000_0000_0111_1000 => 0x00000078
     //    * Since all bits are going to set to 1, keep mask is redundant
-    mov     %r0, #0x00000078
-    ldr     %r1, =GPIOB_OTYPER
+    mov     %r0, #0b00000000000000000000000000011110
+    ldr     %r1, =GPIOA_OTYPER
     ldr     %r2, [%r1]
     orr     %r0, %r0, %r2
     str     %r0, [%r1]
@@ -109,10 +110,10 @@ GPIO_init:
     //    Set to     ----_----_----_----_--10_1010_10--_---
     //    keep mask: 1111_1111_1111_1111_1100_0000_0011_1111 => 0xffffc03f
     //    set mask:  0000_0000_0000_0000_0010_1010_1000_0000 => 0x00002a80
-    mov     %r0, #0x00002a80
-    ldr     %r1, =GPIOB_OSPEEDR
+    mov     %r0, #0b00000000000000000000001010101000
+    ldr     %r1, =GPIOA_OSPEEDR
     ldr     %r2, [%r1]
-    and     %r2, #0xffffc03f
+    and     %r2, #0b11111111111111111111110000000011
     orr     %r0, %r0, %r2
     str     %r0, [%r1]
 
@@ -130,10 +131,10 @@ DisplayLED:
     ldr     %r0, =leds
     ldrb    %r1, [%r0]
 
-    lsl     %r0, %r1, #3    // shift 3 bit left
-    eor     %r0, %r0, #-1   // flip all bits
+    lsl     %r0, %r1, #1    // shift 3 bit left
+    eor     %r0, %r0, #1   // flip all bits
 
-    ldr     %r1, =GPIOB_ODR
+    ldr     %r1, =GPIOA_ODR
     strh    %r0, [%r1]
     BX      %lr
 
