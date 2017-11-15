@@ -34,19 +34,30 @@ GPIO_INIT:
 	mov r1, #0b0111
 	str r1, [r0]
 
-	ldr r0, =GPIOB_MODER
-	ldr r1, [r0]
-	mov r2, #0xFFFFFEBF
-	and r1, r1, r2
-	str r1, [r0]
+	ldr r1, =GPIOC_MODER
+	ldr r2, [r1]
+	//         15141312111009080706050403020100
+	and r2, #0b11110011111111111111111111111111
+	str r2, [r1]
 
-//	mov r0, #0x400
-	mov r0, #0b00000000000000000000010000000000
+	ldr r1, =GPIOB_MODER
+	ldr r2, [r1]
+	//        15141312111009080706050403020100
+	and r2, 0b11111111111111111111111100111111
+	orr r2, 0b00000000000000000000000001000000
+	str r2, [r1]
+	ldr r1, =GPIOB_OSPEEDR
+	ldr r2, [r1]
+	//        15141312111009080706050403020100
+	and r2, 0b11111111111111111111111100111111
+	orr r2, 0b00000000000000000000000001000000
+	str r2, [r1]
+
 	ldr r1, =GPIOA_MODER
 	ldr r2, [r1]
-//	and r2, #0xFFFFF3FF
-	and r2, #0b11111111111111111111001111111111
-	orr r2, r2, r0
+	//         15141312111009080706050403020100
+	and r2, #0b11111111111111111101011111111111
+//	orr r2, r2, r0
 	str r2, [r1]
 
 
@@ -54,24 +65,50 @@ GPIO_INIT:
 	bx lr
 
 B_SET_ONE_AT: // r0:pos
-	PUSH {r0-r3}
+	PUSH {r0-r2}
 	ldr r1, =GPIOB_ODR
-	mov r3, #1
-	lsl r3, r3, r0
-	mov r3, #0xFFFFFFFF
-	strh r3, [r1]
-	POP {r0-r3}
+	mov r2, #1
+	lsl r2, r2, r0
+	strh r2, [r1]
+	POP {r0-r2}
 	bx lr
+
+A_SET_ONE_AT: // r0:pos
+	PUSH {r0-r2}
+	ldr r1, =GPIOA_ODR
+	mov r2, #1
+	lsl r2, r2, r0
+	strh r2, [r1]
+	POP {r0-r2}
+	bx lr
+
+C_READ_BUTTON: // r0: result
+	PUSH {r1}
+	ldr r1, =GPIOC_IDR
+	ldr r1, [r1]
+	// 0010 0000 0000 0000
+	lsr r1, r1, #13
+	and r0, r1, #1
+	POP {r1}
+	bx lr
+
+loop:
+	bl C_READ_BUTTON
+	cmp r0, #1
+	beq IF_OK
+	b IF_DONE
+	IF_OK:
+		mov r0, #3
+		bl B_SET_ONE_AT
+		mov r0, #6
+		bl A_SET_ONE_AT
+		mov r0, #7
+		bl A_SET_ONE_AT
+	IF_DONE:
+	b loop
 
 main:
 	bl GPIO_INIT
 	b loop
-
-loop:
-	ldr r1, =GPIOA_ODR
-	mov r0, #(1<<5)
-	strh r0, [r1]
-	b loop
-
 
 
