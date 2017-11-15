@@ -38,15 +38,26 @@ gpio_init:
 	orr  r2, 0b00000000000000000000000101010100
 	str  r2, [r1]
 
+	ldr  r2, [r1]
+	and  r2, 0b11111111111111111100001111111111
+	orr  r2, 0b00000000000000000001010000000000
+	str  r2, [r1]
+
+
 	add  r1, 0x4 @ GPIOA_OTYPER
 	ldr  r2, [r1]
 	and  r2, 0b11111111111111111111111111100001
+	orr  r2, 0b00000000000000000000000000000000
+	and  r2, 0b11111111111111111111111110000001
+	orr  r2, 0b00000000000000000000000000000000
 	str  r2, [r1]
 
 	add  r1, 0x4 @ GPIOA_SPEEDER
 	ldr  r2, [r1]
 	and  r2, 0b11111111111111111111110000000011
 	orr  r2, 0b00000000000000000000000101010100
+	and  r2, 0b11111111111111111100001111111111
+	orr  r2, 0b00000000000000000001010000000000
 	str  r2, [r1]
 
 	bx   lr
@@ -56,8 +67,7 @@ main:
     BL      gpio_init
     ldr r0, =GPIOA_ODR
     mov r1, 0x0000FFFF
-    str r1, [r0]
-	b main
+    strh r1, [r0]
     MOVS    %r1, #1     // start form the right most position
     LDR     %r0, =leds
     STRB    %r1, [R0]
@@ -70,7 +80,7 @@ loop:
     ldrb    %r3, [%r1]
     cbz     %r3, loop_right
 
-    // shift lighte LED 1 position to left:
+    // shift light LED 1 position to left:
     lsls    %r2, %r2, #1
     cmp     %r2, #0x18
     it      eq
@@ -117,6 +127,18 @@ DisplayLED:
 
     lsl     %r0, %r1, #1    // shift 3 bit left
     eor     %r0, %r0, #1   // flip all bits
+
+	mov     r2, r0
+	lsr     r2, r2, #2
+	and     r2, r2, #1
+	lsl     r2, r2, #5
+	orr     r0, r0, r2
+
+	mov     r2, r0
+	lsr     r2, r2, #3
+	and     r2, r2, #1
+	lsl     r2, r2, #6
+	orr     r0, r0, r2
 
     ldr     %r1, =GPIOA_ODR
     strh    %r0, [%r1]
