@@ -1,8 +1,8 @@
-
-
+#include "inc/stm32l476xx.h"
+#include "inc/utils.h"
 
 void GPIO_init();
-void 4MHz_delay_1s();
+void delay();
 void SystemClock_Config()
 {
 	//TODO: Change the SYSCLK source and set the corresponding Prescaler value.
@@ -19,8 +19,8 @@ int main()
 			
 		}
 		GPIOA->BSRR = (1<<5);
-		4MHz_delay_1s ();
+		delay ();
 		GPIOA->BRR  = (1<<5);
-		4MHz_delay_1s ();
+		delay ();
 	}
 }
