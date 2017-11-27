@@ -1,7 +1,13 @@
 #include "inc/stm32l476xx.h"
-extern void delay_1s();
+extern void delay();
 extern void GPIO_init();
-unsigned int button_cnt;
+
+enum clock_type{C_ONE, C_SIX, C_TEN, C_SIXTEEN, C_FOTFY, C_ALL_TYPE};
+
+
+#define UNTIL(x) while(!(x))
+#define FALSE_ 0
+#define TRUE_ (!(FALSE_))
 //reference to manual p225/1830
 /*
 f(PLLR) = f(PLL CLK INPUT)*(PLLN/(PLLM*PLLR))
@@ -12,12 +18,22 @@ SYS_CLK    PLLN    PLLM   PLLR   OUTPUT RESULT
 16           32      4     2       4*32/8 = 16MHz
 40           80      4     2       4*80/8 = 40MHz
 */
-unsigned int pll_cofig[5] =
-{
-    //PLLR[1:0]|PLLREN|23~16|15|PLLN[7:0]|7|PLLM[2:0]|3 2|PLLSRC[1:0]
 
+    /*  PLLR:   26
+		PLLREN: 24
+		        23-16
+		        15
+		PLLN:   14-8
+		        7
+		PLLM:   6-4
+		        3
+		        2
+		PLLSRC: 1-0
+	 */
     //MSI set as clock entry
     //654321098765432109876543210
+
+const unsigned int pattern[C_ALL_TYPE] = {
     0b011000000000000100001110001,
     0b001000000000000110000110001,
     0b001000000000001010000110001,
@@ -25,85 +41,64 @@ unsigned int pll_cofig[5] =
     0b001000000000101000000110001
 };
 
-void systemclk_setting(int state)
+void systemclk_setting(enum clock_type state)
 {
-    state %= 5; //state cycle
-    //temporarily use ths hsi clock before turning off the pll clock for configuration since the system still need the clock to work
-    RCC->CR |= RCC_CR_HSION; //turn on the hsi clock before configuraion
-    while((RCC->CR & RCC_CR_HSIRDY) == 0); //wait till the hsi clock has been really turned on
+    // use hsi clock
+    RCC->CR |= RCC_CR_HSION;
+    UNTIL (RCC->CR & RCC_CR_HSIRDY)  /* wait */;
 
-    RCC->CFGR = 0x00000000; //CFGR reset value
-    RCC->CR  &= 0xFEFFFFFF; //PLL off
-    while (RCC->CR & 0x02000000); //busy waiting till PLL is really halted
+    RCC->CFGR = 0x00000000;          // reset
+    RCC->CR  &= 0xFEFFFFFF;          // PLL off
+    UNTIL ((RCC->CR & 0x02000000) == 0)/* wait */;
 
-    //after halted, configure the PLLCFGR to set the clock speed
-    RCC->PLLCFGR &= 0x00000001; //off all except the MSI clock source
-    RCC->PLLCFGR |= pll_cofig[state]; //customization PLLN PLLM PLLR settings
+    // PLLCFGR: set clock speed
+    RCC->PLLCFGR &= 0x00000001;      // only the MSI clock source
+    RCC->PLLCFGR |= pattern[state];
 
-    RCC->CR |= RCC_CR_PLLON; //turn on the pll clock again
-	while((RCC->CR & RCC_CR_PLLRDY) == 0); //busy waiting till PLL is really turned on
+    RCC->CR |= RCC_CR_PLLON;         // PLL on
+    UNTIL ((RCC->CR & RCC_CR_PLLRDY))/* wait */;
 
-	RCC->CFGR |= RCC_CFGR_SW_PLL; //set the clock source as pll clock (customized)
-    while ((RCC->CFGR & RCC_CFGR_SWS_PLL) != RCC_CFGR_SWS_PLL); //wait till the pll clock is really set
+	RCC->CFGR |= RCC_CFGR_SW_PLL;    // set clock source to PLL
+	UNTIL ((RCC->CFGR & RCC_CFGR_SWS_PLL) == RCC_CFGR_SWS_PLL) /* wait */;
 }
-int check_the_fucking_button()
+int read_from(uint32_t src, int port)
+{
+	return src & (1<<port);
+}
+
+int pressed()
 {
 	static int debounce = 0;
-	if( (GPIOC->IDR & 0b0010000000000000) == 0)
-	{ // pressed
+	if( read_from(GPIOC->IDR, 13) == 0)
+	{
 	    debounce = debounce >= 1 ? 1 : debounce+1 ;
-	    return 0;
+	    return FALSE_;
 	}
 	else if( debounce >= 1 )
 	{
 	    debounce = 0;
-	    return 1;
+	    return TRUE_;
 	}
-	return 0;
+	return FALSE_;
 }
 
 int main()
 {
     GPIO_init();
-    static int state = 0;
-    button_cnt = 0;
-    systemclk_setting(0); //initil state
-    while(1)
+    enum clock_type state = C_ONE;
+    systemclk_setting(state);
+    for(;;)
     {
-        if(check_the_fucking_button())
+        if(pressed())
         {
-            state+=1;
-            systemclk_setting(state);
+        		state = (state == C_FOTFY)? C_ONE: state + 1;
+        	    systemclk_setting(state);
         }
 
 		GPIOA->ODR = 0b0000000000000000;
-        if(check_the_fucking_button())
-        {
-            state+=1;
-            systemclk_setting(state);
-        }
-
-		delay_1s();
-        if(check_the_fucking_button())
-        {
-            state+=1;
-            systemclk_setting(state);
-        }
-
+		delay();
 		GPIOA->ODR = 0b0000000000100000;
-        if(check_the_fucking_button())
-        {
-            state+=1;
-            systemclk_setting(state);
-        }
-
-		delay_1s();
-        if(check_the_fucking_button())
-        {
-            state+=1;
-            systemclk_setting(state);
-        }
-
+		delay();
     }
     return 0;
 }
