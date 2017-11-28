@@ -4,7 +4,7 @@
 .text
 	.global GPIO_init
 	.global delay
-	.equ onesec, 200000	
+	.equ    onesec, 200000
     .equ    RCC_AHB2ENR,    0x4002104C
     .equ    GPIOA_MODER,    0x48000000
     .equ    GPIOA_OSPEEDER, 0x48000008
@@ -40,19 +40,27 @@
     .equ    DISPLAY_TEST,   0x1F //display test
 
 GPIO_init:
-    push {r0,r1,r2,lr}
+    push {r0-r2,lr}
     ldr r0, =RCC_AHB2ENR
     mov r1, 0b111
     str r1, [r0]
 
-    //GPIOA_MODER: PA7 6 5: output
-    ldr r0, =0b010101
-    lsl r0, 10
-    ldr r1, =GPIOA_MODER
-    ldr r2, [r1]
-    and r2, 0xFFFF03FF //clear 7 6 5
-    orrs r2, r2, r0    //7 6 5  --> output
-    str r2, [r1]
+	ldr r1, =GPIOA_MODER // GPIOA_MODER
+	ldr r2, [r1]
+	and r2, 0b11111111111111110000001111111111
+	orr r2, 0b00000000000000000101010000000000
+	str r2, [r1]
+
+	add r1, #4
+	ldr r2, [r1]
+	and r2, 0b11111111111111111111111100011111
+	str r2, [r1]
+
+	add r1, #4
+	ldr r2, [r1]
+	and r2, 0b11111111111111110000001111111111
+	orr r2, 0b00000000000000000101010000000000
+	str r2, [r1]
 
     ldr r0, =GPIOC_MODER
     ldr r1, [r0]
@@ -60,7 +68,7 @@ GPIO_init:
     and r1, r1, 0xf3ffffff
     str r1, [r0]
 
-    pop {r0,r1,r2,lr}
+    pop {r0-r2,lr}
 	BX LR
 
 

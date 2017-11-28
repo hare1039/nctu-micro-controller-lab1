@@ -1,6 +1,8 @@
 #include "inc/stm32l476xx.h"
 extern void delay();
 extern void GPIO_init();
+extern void MAX7219_init();
+extern void display_array(char * array, int up_limit);
 
 enum clock_type{C_ONE, C_SIX, C_TEN, C_SIXTEEN, C_FOTFY, C_ALL_TYPE};
 
@@ -82,9 +84,22 @@ int pressed()
 	return FALSE_;
 }
 
+void display(int src, int lim)
+{
+	char c[8] = {0};
+	int i = 8, t = 10000000;
+	for(; i ; i--)
+	{
+		c[8 - i] = (src / t) % 10;
+		t /= 10;
+	}
+	display_array(c, lim - 1);
+}
+
 int main()
 {
     GPIO_init();
+    MAX7219_init();
     enum clock_type state = C_ONE;
     systemclk_setting(state);
     for(;;)
@@ -94,7 +109,7 @@ int main()
         		state = (state == C_FOTFY)? C_ONE: state + 1;
         	    systemclk_setting(state);
         }
-
+        display(123, 5);
 		GPIOA->ODR = 0b0000000000000000;
 		delay();
 		GPIOA->ODR = 0b0000000000100000;

@@ -4,14 +4,16 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 S_SRCS += \
-../src/GPIO_init.s 
+../src/GPIO_init.s \
+../src/max7219.s 
 
 C_SRCS += \
 ../src/main.c 
 
 OBJS += \
 ./src/GPIO_init.o \
-./src/main.o 
+./src/main.o \
+./src/max7219.o 
 
 C_DEPS += \
 ./src/main.d 
