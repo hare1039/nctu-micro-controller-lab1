@@ -1,104 +1,110 @@
 #include "inc/stm32l476xx.h"
-extern void delay();
-extern void GPIO_init();
-extern void MAX7219_init();
-extern void display_array(char * array, int up_limit);
+#include "gpio.h"
+extern void gpio_init();
+extern void fpu_enable();
 
-const int max_count_centi = 1000;
+#define DO 261.6
+#define RE 293.7
+#define MI 329.6
+#define FA 349.2
+#define SO 392.0
+#define LA 440.0
+#define SI 493.9
+#define HI_DO 523.3
 
-#define UNTIL(x) while(!(x))
-#define FALSE_ 0
-#define TRUE_ (!(FALSE_))
-
-int read_from(uint32_t src, int port)
-{
-	return src & (1<<port);
-}
-
-int pressed()
-{
-	static int debounce = 0;
-	if( read_from(GPIOC->IDR, 13) == 0)
-	{
-	    debounce = debounce >= 1 ? 1 : debounce+1 ;
-	    return FALSE_;
-	}
-	else if( debounce >= 1 )
-	{
-	    debounce = 0;
-	    return TRUE_;
-	}
-	return FALSE_;
-}
-
-int append_dot(int who)
-{
-	return -16 + who;
-}
-
-void display_int(int src, int lim)
-{
-	char c[8] = {0};
-	int i = 8, t = 10000000;
-	for(; i ; i--)
-	{
-		c[8 - i] = (src / t) % 10;
-		t /= 10;
-	}
-	display_array(c, lim - 1);
-}
-
-void display_clock(int centi)
-{
-	char c[8] = {0};
-	int i = 8, t = 10000000, lim = 7;
-	for(; i ; i--)
-	{
-		c[8 - i] = (centi / t) % 10;
-		t /= 10;
-		if(lim == 7 && c[8 - i] != 0)
-			lim = i - 1;
-	}
-	c[5] = append_dot(c[5]);
-	display_array(c, lim < 2? 2: lim);
-}
+float freq = -1;
+int curr = -2, prev = -3, check = -4;
+int duty_cycle = 50;
 
 void timer_init()
 {
-    RCC->APB1ENR1 |= RCC_APB1ENR1_TIM2EN; //turn on the timer2
-    TIM2->CR1 &= 0x0000; // count up mode
-    TIM2->PSC = 39999U;  // prescaler
-    TIM2->ARR = 99U;     // counters
-    TIM2->EGR = 0x0001;  //re-initailzie timer to startup
+	RCC->APB1ENR1 |= RCC_APB1ENR1_TIM2EN;
+	GPIOB->AFR[0] |= GPIO_AFRL_AFSEL3_0;
+	TIM2->CR1 |= TIM_CR1_DIR;
+	TIM2->CR1 |= TIM_CR1_ARPE;
+	TIM2->ARR = (uint32_t) 100;
+	TIM2->CCMR1 &= 0xFFFFFCFF;
+	TIM2->CCMR1 |= (TIM_CCMR1_OC2M_2 | TIM_CCMR1_OC2M_1);
+	TIM2->CCMR1 |= TIM_CCMR1_OC2PE;
+	TIM2->CCER |= TIM_CCER_CC2E;
+	TIM2->EGR = TIM_EGR_UG;
 }
 
-void timer_start()
+void timer_config()
 {
-    TIM2->CR1 |= TIM_CR1_CEN; // counter mode, change in the control register
-    TIM2->SR &= ~(TIM_SR_UIF); // close the user interrupt mode
+	TIM2->PSC = (uint32_t) (4000000 / freq / 100);
+	TIM2->CCR2 = duty_cycle;
 }
+
 
 int main()
 {
-    GPIO_init();
-    MAX7219_init();
-    timer_init();
-    timer_start();
-    display_int(0, 1);
-
-    int current_time = 0;
-    for(;;)
-    {
-        	if(TIM2->SR & 1) // event :: 1 second
-    	    	{
-    	    	    current_time += 100;
-    	    	    TIM2->SR &= ~(TIM_SR_UIF); //reset
-    	    }
-    	    int now = current_time + TIM2->CNT;
-    	    if(now <= max_count_centi)
-    	    {
-    	    	    display_clock(now);
-    	    }
-    }
-    return 0;
+	fpu_enable();
+	gpio_init();
+	keypad_init();
+	timer_init();
+	for(;;)
+		{
+			prev = curr;
+			curr = keypad_scan();
+			if (curr == prev)
+				check = 86400;
+			else
+				check = curr;
+			switch (check)
+			{
+			case 1:
+				freq = DO;
+				timer_config();
+				TIM2->CR1 |= TIM_CR1_CEN;
+				break;
+			case 2:
+				freq = RE;
+				timer_config();
+				TIM2->CR1 |= TIM_CR1_CEN;
+				break;
+			case 3:
+				freq = MI;
+				timer_config();
+				TIM2->CR1 |= TIM_CR1_CEN;
+				break;
+			case 4:
+				freq = FA;
+				timer_config();
+				TIM2->CR1 |= TIM_CR1_CEN;
+				break;
+			case 5:
+				freq = SO;
+				timer_config();
+				TIM2->CR1 |= TIM_CR1_CEN;
+				break;
+			case 6:
+				freq = LA;
+				timer_config();
+				TIM2->CR1 |= TIM_CR1_CEN;
+				break;
+			case 7:
+				freq = SI;
+				timer_config();
+				TIM2->CR1 |= TIM_CR1_CEN;
+				break;
+			case 8:
+				freq = HI_DO;
+				timer_config();
+				TIM2->CR1 |= TIM_CR1_CEN;
+				break;
+			case 10:
+				duty_cycle = duty_cycle == 90 ? duty_cycle : duty_cycle + 5;
+				break;
+			case 11:
+				duty_cycle = duty_cycle == 10 ? duty_cycle : duty_cycle - 5;
+				break;
+			case 86400:
+				break;
+			default:
+				TIM2->CR1 &= ~TIM_CR1_CEN;
+				freq = -1;
+				break;
+			}
+		}
 }
