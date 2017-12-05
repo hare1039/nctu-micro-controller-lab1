@@ -10,59 +10,7 @@ enum clock_type{C_ONE, C_SIX, C_TEN, C_SIXTEEN, C_FOTFY, C_ALL_TYPE};
 #define UNTIL(x) while(!(x))
 #define FALSE_ 0
 #define TRUE_ (!(FALSE_))
-//reference to manual p225/1830
-/*
-f(PLLR) = f(PLL CLK INPUT)*(PLLN/(PLLM*PLLR))
-SYS_CLK    PLLN    PLLM   PLLR   OUTPUT RESULT
-1            8       8     4       4*8/32 = 1MHz
-6            12      4     2       4*12/8 = 6MHz
-10           20      4     2       4*20/8 = 10MHz
-16           32      4     2       4*32/8 = 16MHz
-40           80      4     2       4*80/8 = 40MHz
-*/
 
-    /*  PLLR:   26
-		PLLREN: 24
-		        23-16
-		        15
-		PLLN:   14-8
-		        7
-		PLLM:   6-4
-		        3
-		        2
-		PLLSRC: 1-0
-	 */
-    //MSI set as clock entry
-    //654321098765432109876543210
-
-const unsigned int pattern[C_ALL_TYPE] = {
-    0b011000000000000100001110001,
-    0b001000000000000110000110001,
-    0b001000000000001010000110001,
-    0b001000000000010000000110001,
-    0b001000000000101000000110001
-};
-
-void systemclk_setting(enum clock_type state)
-{
-    // use hsi clock
-    RCC->CR |= RCC_CR_HSION;
-    UNTIL (RCC->CR & RCC_CR_HSIRDY)  /* wait */;
-
-    RCC->CFGR = 0x00000000;          // reset
-    RCC->CR  &= 0xFEFFFFFF;          // PLL off
-    UNTIL ((RCC->CR & 0x02000000) == 0)/* wait */;
-
-    // PLLCFGR: set clock speed
-    RCC->PLLCFGR &= 0x00000001;      // only the MSI clock source
-    RCC->PLLCFGR |= pattern[state];
-
-    RCC->CR |= RCC_CR_PLLON;         // PLL on
-    UNTIL ((RCC->CR & RCC_CR_PLLRDY))/* wait */;
-
-	RCC->CFGR |= RCC_CFGR_SW_PLL;    // set clock source to PLL
-	UNTIL ((RCC->CFGR & RCC_CFGR_SWS_PLL) == RCC_CFGR_SWS_PLL) /* wait */;
-}
 int read_from(uint32_t src, int port)
 {
 	return src & (1<<port);
@@ -84,7 +32,12 @@ int pressed()
 	return FALSE_;
 }
 
-void display(int src, int lim)
+int append_dot(int who)
+{
+	return -16 + who;
+}
+
+void display_int(int src, int lim)
 {
 	char c[8] = {0};
 	int i = 8, t = 10000000;
@@ -96,24 +49,45 @@ void display(int src, int lim)
 	display_array(c, lim - 1);
 }
 
+void display_float(int centi)
+{
+	char c[8] = {0};
+	int i = 8, t = 10000000, lim = 7;
+	for(; i ; i--)
+	{
+		c[8 - i] = (centi / t) % 10;
+		t /= 10;
+		if(lim == 7 && c[8 - i] != 0)
+			lim = i - 1;
+	}
+	c[5] = append_dot(c[5]);
+
+	display_array(c, lim);
+}
+
+void timer_init()
+{
+    RCC->APB1ENR1 |= RCC_APB1ENR1_TIM2EN; //turn on the timer2
+    TIM2->CR1 &= 0x0000; // count up mode
+    TIM2->PSC = 39999U;  // prescaler
+    TIM2->ARR = 99U;     // counters
+    TIM2->EGR = 0x0001;  //re-initailzie timer to startup
+}
+
+void Timer_start(TIM_TypeDef *timer)
+{
+    TIM2->CR1 |= TIM_CR1_CEN; // counter mode, change in the control register
+    TIM2->SR &= ~(TIM_SR_UIF); // close the user interrupt mode
+}
+
 int main()
 {
     GPIO_init();
     MAX7219_init();
-    enum clock_type state = C_ONE;
-    systemclk_setting(state);
     for(;;)
     {
-        if(pressed())
-        {
-        		state = (state == C_FOTFY)? C_ONE: state + 1;
-        	    systemclk_setting(state);
-        }
-        display(123, 5);
-		GPIOA->ODR = 0b0000000000000000;
-		delay();
-		GPIOA->ODR = 0b0000000000100000;
-		delay();
+        display_float(11245);
+     	// display_int(10, 5);
     }
     return 0;
 }
