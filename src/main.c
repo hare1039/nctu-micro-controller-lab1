@@ -4,8 +4,7 @@ extern void GPIO_init();
 extern void MAX7219_init();
 extern void display_array(char * array, int up_limit);
 
-enum clock_type{C_ONE, C_SIX, C_TEN, C_SIXTEEN, C_FOTFY, C_ALL_TYPE};
-
+const int max_count_centi = 1000;
 
 #define UNTIL(x) while(!(x))
 #define FALSE_ 0
@@ -49,7 +48,7 @@ void display_int(int src, int lim)
 	display_array(c, lim - 1);
 }
 
-void display_float(int centi)
+void display_clock(int centi)
 {
 	char c[8] = {0};
 	int i = 8, t = 10000000, lim = 7;
@@ -61,8 +60,7 @@ void display_float(int centi)
 			lim = i - 1;
 	}
 	c[5] = append_dot(c[5]);
-
-	display_array(c, lim);
+	display_array(c, lim < 2? 2: lim);
 }
 
 void timer_init()
@@ -74,7 +72,7 @@ void timer_init()
     TIM2->EGR = 0x0001;  //re-initailzie timer to startup
 }
 
-void Timer_start(TIM_TypeDef *timer)
+void timer_start()
 {
     TIM2->CR1 |= TIM_CR1_CEN; // counter mode, change in the control register
     TIM2->SR &= ~(TIM_SR_UIF); // close the user interrupt mode
@@ -84,10 +82,23 @@ int main()
 {
     GPIO_init();
     MAX7219_init();
+    timer_init();
+    timer_start();
+    display_int(0, 1);
+
+    int current_time = 0;
     for(;;)
     {
-        display_float(11245);
-     	// display_int(10, 5);
+        	if(TIM2->SR & 1) // event :: 1 second
+    	    	{
+    	    	    current_time += 100;
+    	    	    TIM2->SR &= ~(TIM_SR_UIF); //reset
+    	    }
+    	    int now = current_time + TIM2->CNT;
+    	    if(now <= max_count_centi)
+    	    {
+    	    	    display_clock(now);
+    	    }
     }
     return 0;
 }
