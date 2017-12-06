@@ -1,4 +1,4 @@
-"src/gpio.o"
+"src/22_lab6.o"
 "src/main.o"
 "startup/startup_stm32.o"
 "startup/sysmem.o"
