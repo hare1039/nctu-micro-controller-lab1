@@ -1,110 +1,210 @@
-#include "inc/stm32l476xx.h"
-#include "gpio.h"
-extern void gpio_init();
-extern void fpu_enable();
+/********************************************************
+ * Micro Computer System Lab - Lab 10: UART and ADC
+ *                                               Group 49
+ ********************************************************
+ * Lab 10-2: Measure the Voltage of Photoresistor
+ *
+ * Measure the voltage of photoresister via the onboard
+ * ADC (Analog to Digital Converter) with a resolution of
+ * 12 bit and display the result when the user button
+ * (PC13) is triggered.
+ ********************************************************/
 
-#define DO 261.6
-#define RE 293.7
-#define MI 329.6
-#define FA 349.2
-#define SO 392.0
-#define LA 440.0
-#define SI 493.9
-#define HI_DO 523.3
+#define STM32L476XX
 
-float freq = -1;
-int curr = -2, prev = -3, check = -4;
-int duty_cycle = 50;
+#ifndef USE_FULL_LL_DRIVER
+#define USE_FULL_LL_DRIVER
+#endif
 
-void timer_init()
+#include "stdio.h"
+
+#include "stm32l476xx.h"
+#include "stm32l4xx_ll_gpio.h"
+#include "stm32l4xx_ll_rcc.h"
+#include "stm32l4xx_ll_bus.h"
+#include "stm32l4xx_ll_usart.h"
+#include "stm32l4xx_ll_adc.h"
+#include "stm32l4xx_ll_tim.h"
+
+
+#define ADC1_2_IRQn 18
+
+void SystemClock_Config()
 {
-	RCC->APB1ENR1 |= RCC_APB1ENR1_TIM2EN;
-	GPIOB->AFR[0] |= GPIO_AFRL_AFSEL3_0;
-	TIM2->CR1 |= TIM_CR1_DIR;
-	TIM2->CR1 |= TIM_CR1_ARPE;
-	TIM2->ARR = (uint32_t) 100;
-	TIM2->CCMR1 &= 0xFFFFFCFF;
-	TIM2->CCMR1 |= (TIM_CCMR1_OC2M_2 | TIM_CCMR1_OC2M_1);
-	TIM2->CCMR1 |= TIM_CCMR1_OC2PE;
-	TIM2->CCER |= TIM_CCER_CC2E;
-	TIM2->EGR = TIM_EGR_UG;
+    // Set system clock to 10 MHz
+    LL_RCC_MSI_EnableRangeSelection();
+    LL_RCC_MSI_SetRange(LL_RCC_MSIRANGE_9);
+    while (!LL_RCC_MSI_IsReady());
+    LL_RCC_SetSysClkSource(LL_RCC_SYS_CLKSOURCE_MSI);
+    // 10 = 24 * ( 10 / 3 ) / 8
+    LL_RCC_PLL_ConfigDomain_SYS(LL_RCC_PLLSOURCE_MSI,
+    		                        LL_RCC_PLLM_DIV_3,
+						        10,
+								LL_RCC_PLLR_DIV_8);
+    LL_RCC_PLL_EnableDomain_SYS();
+    LL_RCC_PLL_Enable();
+
+    while (!LL_RCC_PLL_IsReady());
+
+    LL_RCC_SetSysClkSource(LL_RCC_SYS_CLKSOURCE_PLL);
 }
 
-void timer_config()
+#define SetPin   LL_GPIO_SetOutputPin
+#define ResetPin LL_GPIO_ResetOutputPin
+#define UserButton GPIOC, LL_GPIO_PIN_13
+#define IsSetPin LL_GPIO_IsInputPinSet
+
+void BTN_Config()
 {
-	TIM2->PSC = (uint32_t) (4000000 / freq / 100);
-	TIM2->CCR2 = duty_cycle;
+    RCC->AHB2ENR |= RCC_AHB2ENR_GPIOCEN;
+    // button
+    LL_GPIO_SetPinMode (UserButton, LL_GPIO_MODE_INPUT);
+    LL_GPIO_SetPinSpeed(UserButton, LL_GPIO_SPEED_HIGH);
+    LL_GPIO_SetPinPull (UserButton, LL_GPIO_PULL_DOWN);
 }
 
+#define DEBOUNCE 40
+int user_press_button()
+{
+    static int btn = 1;
+    static int cnt = DEBOUNCE;
+    static int pressed = 0;
+    if (IsSetPin(UserButton) ^ btn)
+    {
+        if (!--cnt)
+        {
+           	btn = !btn;
+           	pressed = 0;
+        }
+    }
+    else
+    {
+        cnt = DEBOUNCE;
+    }
+    return !btn && !pressed ? (pressed = 1) : 0;
+}
+
+/* UART */
+void UART_config()
+{
+    RCC->AHB2ENR |= RCC_AHB2ENR_GPIOAEN;
+    uint32_t gpio_pin = LL_GPIO_PIN_2;
+    LL_GPIO_SetPinMode  (GPIOA, gpio_pin, LL_GPIO_MODE_ALTERNATE);
+    LL_GPIO_SetPinPull  (GPIOA, gpio_pin, LL_GPIO_PULL_DOWN);
+    LL_GPIO_SetPinSpeed (GPIOA, gpio_pin, LL_GPIO_SPEED_FREQ_VERY_HIGH);
+    LL_GPIO_SetAFPin_0_7(GPIOA, gpio_pin, LL_GPIO_AF_7);
+    gpio_pin = LL_GPIO_PIN_3;
+    LL_GPIO_SetPinMode  (GPIOA, gpio_pin, LL_GPIO_MODE_ALTERNATE);
+    LL_GPIO_SetPinPull  (GPIOA, gpio_pin, LL_GPIO_PULL_DOWN);
+    LL_GPIO_SetPinSpeed (GPIOA, gpio_pin, LL_GPIO_SPEED_FREQ_VERY_HIGH);
+    LL_GPIO_SetAFPin_0_7(GPIOA, gpio_pin, LL_GPIO_AF_7);
+
+    LL_RCC_SetUARTClockSource(LL_RCC_USART2_CLKSOURCE_SYSCLK);
+    RCC->APB1ENR1 |= RCC_APB1ENR1_USART2EN;
+
+    USART2->CR1 = (USART2->CR1 & ~(USART_CR1_OVER8_Msk |
+    		                           USART_CR1_M_Msk |
+								   USART_CR1_TE_Msk |
+								   USART_CR1_RE_Msk |
+								   USART_CR1_PCE_Msk)) |
+								  (USART_CR1_TE | USART_CR1_RE);
+    USART2->CR2 = (USART2->CR2 & ~(USART_CR2_STOP_Msk));
+    USART2->BRR = 10000000 / 9600;
+    USART2->CR1 |= USART_CR1_UE;
+}
+
+void UART_send(char* d)
+{
+    while (*d)
+    {
+        // Wait
+        while (!(USART2->ISR & USART_ISR_TXE));
+        USART2->TDR = *d++;
+    }
+}
+
+void configureADC()
+{
+    uint32_t channel = LL_ADC_CHANNEL_5;
+
+    RCC->AHB2ENR |= RCC_AHB2ENR_GPIOAEN;
+    LL_GPIO_SetPinMode(GPIOA, LL_GPIO_PIN_0, LL_GPIO_MODE_ANALOG);
+    LL_GPIO_SetPinPull(GPIOA, LL_GPIO_PIN_0, LL_GPIO_PULL_NO);
+    LL_GPIO_EnablePinAnalogControl(GPIOA, LL_GPIO_PIN_0);
+
+    // clock
+    RCC->AHB2ENR |= RCC_AHB2ENR_ADCEN;
+    LL_RCC_SetADCClockSource(LL_RCC_ADC_CLKSOURCE_SYSCLK);
+
+    // Keep pre-scalar as default
+    LL_ADC_SetCommonClock        (ADC123_COMMON, LL_ADC_CLOCK_SYNC_PCLK_DIV1);
+    //LL_ADC_SetCommonClock        (ADC123_COMMON, LL_ADC_CLOCK_ASYNC_DIV2);
+    LL_ADC_SetMultimode          (ADC123_COMMON, LL_ADC_MULTI_INDEPENDENT);
+    LL_ADC_SetOverSamplingScope  (ADC1, LL_ADC_OVS_DISABLE);
+    LL_ADC_SetResolution         (ADC1, LL_ADC_RESOLUTION_12B);
+    LL_ADC_SetChannelSamplingTime(ADC1, channel, LL_ADC_SAMPLINGTIME_6CYCLES_5);
+    LL_ADC_SetDataAlignment      (ADC1, LL_ADC_DATA_ALIGN_RIGHT);
+
+    // Disable deep power mode to start the voltage conversion
+    LL_ADC_DisableDeepPowerDown(ADC1);
+
+    // Enable related interrupt
+    NVIC_EnableIRQ  (ADC1_2_IRQn);
+    NVIC_SetPriority(ADC1_2_IRQn, 0);
+
+    LL_ADC_REG_SetContinuousMode  (ADC1, LL_ADC_REG_CONV_SINGLE);
+    LL_ADC_REG_SetTriggerSource   (ADC1, LL_ADC_REG_TRIG_SOFTWARE);
+    LL_ADC_REG_SetSequencerDiscont(ADC1, LL_ADC_REG_SEQ_DISCONT_DISABLE);
+
+    LL_ADC_REG_SetSequencerLength (ADC1, LL_ADC_REG_SEQ_SCAN_DISABLE);
+    LL_ADC_REG_SetSequencerDiscont(ADC1, LL_ADC_REG_SEQ_DISCONT_DISABLE);
+    LL_ADC_REG_SetSequencerRanks  (ADC1, LL_ADC_REG_RANK_1, channel); // PA0 -> ADC12_IN_5
+
+    LL_ADC_EnableInternalRegulator(ADC1);
+    while (! LL_ADC_IsInternalRegulatorEnabled(ADC1));
+
+    LL_ADC_EnableIT_EOC(ADC1);
+    LL_ADC_Enable(ADC1);
+}
+
+int raw_data;
+void ADC1_2_IRQHandler()
+{
+    NVIC_ClearPendingIRQ(ADC1_2_IRQn);
+    if (LL_ADC_IsActiveFlag_EOC(ADC1))
+    {
+        raw_data = ADC1->DR;
+        LL_ADC_ClearFlag_EOC(ADC1);
+    }
+}
+void startADC()
+{
+	LL_ADC_REG_StartConversion(ADC1);
+}
 
 int main()
 {
-	fpu_enable();
-	gpio_init();
-	keypad_init();
-	timer_init();
-	for(;;)
-		{
-			prev = curr;
-			curr = keypad_scan();
-			if (curr == prev)
-				check = 86400;
-			else
-				check = curr;
-			switch (check)
-			{
-			case 1:
-				freq = DO;
-				timer_config();
-				TIM2->CR1 |= TIM_CR1_CEN;
-				break;
-			case 2:
-				freq = RE;
-				timer_config();
-				TIM2->CR1 |= TIM_CR1_CEN;
-				break;
-			case 3:
-				freq = MI;
-				timer_config();
-				TIM2->CR1 |= TIM_CR1_CEN;
-				break;
-			case 4:
-				freq = FA;
-				timer_config();
-				TIM2->CR1 |= TIM_CR1_CEN;
-				break;
-			case 5:
-				freq = SO;
-				timer_config();
-				TIM2->CR1 |= TIM_CR1_CEN;
-				break;
-			case 6:
-				freq = LA;
-				timer_config();
-				TIM2->CR1 |= TIM_CR1_CEN;
-				break;
-			case 7:
-				freq = SI;
-				timer_config();
-				TIM2->CR1 |= TIM_CR1_CEN;
-				break;
-			case 8:
-				freq = HI_DO;
-				timer_config();
-				TIM2->CR1 |= TIM_CR1_CEN;
-				break;
-			case 10:
-				duty_cycle = duty_cycle == 90 ? duty_cycle : duty_cycle + 5;
-				break;
-			case 11:
-				duty_cycle = duty_cycle == 10 ? duty_cycle : duty_cycle - 5;
-				break;
-			case 86400:
-				break;
-			default:
-				TIM2->CR1 &= ~TIM_CR1_CEN;
-				freq = -1;
-				break;
-			}
-		}
+    // Enable FPU
+    MODIFY_REG(SCB->CPACR, 0xf << 20, 0xf << 20);
+    SystemClock_Config();
+    UART_config();
+    BTN_Config();
+    configureADC();
+    startADC();
+    int wait = 10000;
+    char buf[100];
+    for(;;)
+    {
+        if (user_press_button())
+        {
+            sprintf(buf, "get: %d\n\r", raw_data);
+            UART_send(buf);
+        }
+        if (wait-- == 0)
+        {
+            startADC();
+            wait = 10000;
+        }
+    }
+    return 0;
 }

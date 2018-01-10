@@ -41,6 +41,8 @@
 								<option id="gnu.cpp.compiler.option.debugging.level.1923653939" name="Debug Level" superClass="gnu.cpp.compiler.option.debugging.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.debugging.level.max" valueType="enumerated"/>
 							</tool>
 							<tool id="fr.ac6.managedbuild.tool.gnu.cross.c.linker.497760079" name="MCU GCC Linker" superClass="fr.ac6.managedbuild.tool.gnu.cross.c.linker">
+								<option id="gnu.c.link.option.ldflags.1215204605" name="Linker flags" superClass="gnu.c.link.option.ldflags" value="-u _printf_float" valueType="string"/>
+								<option id="gnu.c.link.option.other.2029567870" name="Other options (-Xlinker [option])" superClass="gnu.c.link.option.other" valueType="stringList"/>
 								<inputType id="cdt.managedbuild.tool.gnu.c.linker.input.135750917" superClass="cdt.managedbuild.tool.gnu.c.linker.input">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
 									<additionalInput kind="additionalinput" paths="$(LIBS)"/>
@@ -138,4 +140,5 @@
 		</scannerConfigBuildInfo>
 	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
+	<storageModule moduleId="refreshScope"/>
 </cproject>

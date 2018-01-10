@@ -4,17 +4,20 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 S_SRCS += \
-../startup/startup_stm32.s 
+../startup/startup_stm32l476xx.s 
 
 C_SRCS += \
-../startup/sysmem.c 
+../startup/sysmem.c \
+../startup/system_stm32l4xx.c 
 
 OBJS += \
-./startup/startup_stm32.o \
-./startup/sysmem.o 
+./startup/startup_stm32l476xx.o \
+./startup/sysmem.o \
+./startup/system_stm32l4xx.o 
 
 C_DEPS += \
-./startup/sysmem.d 
+./startup/sysmem.d \
+./startup/system_stm32l4xx.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes
